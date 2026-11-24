@@ -1,0 +1,17 @@
+{
+  "name": "易占",
+  "short_name": "易占",
+  "description": "三數起卦・蓍草演卦・時間起卦，斷占依朱熹〈考變占〉",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfbf8",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
