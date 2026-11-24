@@ -1,5 +1,5 @@
 // 易占 service worker：離線快取。修改任何檔案後，請把 VERSION 加一，手機才會更新。
-const VERSION = 'yizhan-v1';
+const VERSION = 'yizhan-v2';
 const FILES = [
   './',
   './index.html',
@@ -20,6 +20,10 @@ self.addEventListener('activate', e => {
 // 先用快取（可離線），同時在背景向網路取新版存入快取
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (e.request.mode === 'navigate') {
+    e.respondWith(fetch(e.request).then(r => { const c2 = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', c2)); return r; }).catch(() => caches.match('./index.html')));
+    return;
+  }
   e.respondWith(caches.open(VERSION).then(async c => {
     const hit = await c.match(e.request, {ignoreSearch: true});
     const net = fetch(e.request).then(r => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit);

@@ -20,10 +20,11 @@
    PICTURE: 本卦→互卦→之卦三卦大畫，動爻朱色；其下斷占
    COLOUR and TYPE: 紙白、墨黑、朱砂；霞鶩文楷 + 思源宋體
    LAYOUT: 墨色頂帶標題與三分頁，下接起卦面板、三卦、斷占、卦爻辭、紀錄 */
-:root{color-scheme:light dark;--bg:light-dark(#fbfbf8,#121212);--ink:light-dark(#1a1a1a,#ecebe6);--mute:light-dark(#5d5d58,#a3a29b);--line:light-dark(#dcdbd4,#33332f);--card:light-dark(#ffffff,#1b1b1a);--zhu:light-dark(#b3261e,#e0574c);--band:light-dark(#1a1a1a,#050505);--bandink:#f3f2ec;--ok:light-dark(#2d6a3e,#7cc08e)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root{color-scheme:light;--bg:#fbfbf8;--ink:#1a1a1a;--mute:#5d5d58;--line:#c9c8c0;--card:#ffffff;--zhu:#b3261e;--band:#1a1a1a;--bandink:#f3f2ec;--ok:#2d6a3e}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#121212;--ink:#ecebe6;--mute:#a3a29b;--line:#4a4a45;--card:#1b1b1a;--zhu:#e0574c;--band:#050505;--ok:#7cc08e}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#121212;--ink:#ecebe6;--mute:#a3a29b;--line:#4a4a45;--card:#1b1b1a;--zhu:#e0574c;--band:#050505;--ok:#7cc08e}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU","Songti TC",serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU","Songti TC",serif;overflow-x:hidden}
 .kai{font-family:"LXGW WenKai TC","Kaiti TC","BiauKai",serif}
 .band{padding:clamp(22px,3.5vw,48px) max(5vw,16px)}
 .wrap{max-width:1180px;margin:0 auto}
@@ -37,12 +38,12 @@ h1{font:700 clamp(36px,6vw,52px)/1.05 "LXGW WenKai TC",serif;margin:0 0 6px;lett
 .panel{background:var(--card);border-bottom:1px solid var(--line)}
 .form{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-end}
 .form label{display:grid;gap:4px;font-size:14px;color:var(--mute)}
-input[type=number],input[type=text],input[type=datetime-local]{font:inherit;font-size:18px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 12px;min-height:44px;width:8em}
+input[type=number],input[type=text],input[type=datetime-local]{-webkit-appearance:none;appearance:none;font:inherit;font-size:18px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 12px;min-height:44px;width:8em}
 input.wide{width:min(18em,80vw)}
 .q input{width:min(26em,86vw)}
 .chk{display:flex!important;align-items:center;gap:8px;min-height:44px}
 .chk input{width:20px;height:20px;accent-color:var(--zhu)}
-.btn{font:inherit;font-size:17px;min-height:44px;padding:9px 22px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.btn{-webkit-appearance:none;appearance:none;font:inherit;font-size:17px;min-height:44px;padding:9px 22px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink)}
 .btn.zhu{background:var(--zhu);border-color:var(--zhu);color:#fff}
 .hint{font-size:14px;color:var(--mute);margin:12px 0 0;max-width:70ch}
@@ -122,6 +123,7 @@ details{margin-top:22px}summary{cursor:pointer;min-height:44px;display:flex;alig
 </style>
 </head>
 <body>
+<div id="jserr" hidden style="background:#b3261e;color:#fff;padding:10px 16px;font-size:14px"></div>
 <header class="band">
  <div class="wrap">
   <h1>易占</h1>
@@ -224,7 +226,9 @@ details{margin-top:22px}summary{cursor:pointer;min-height:44px;display:flex;alig
 </section>
 
 <script>
-{
+window.onerror=function(m,u,l){var e=document.getElementById('jserr');if(e){e.hidden=false;e.textContent='程式錯誤：'+m+'（第'+l+'行）。請截圖回報。'}};
+(function(){
+'use strict';
 const TRI=[null,
  ['乾','天',[1,1,1],'金'],['兌','澤',[1,1,0],'金'],['離','火',[1,0,1],'火'],['震','雷',[1,0,0],'木'],
  ['巽','風',[0,1,1],'木'],['坎','水',[0,1,0],'水'],['艮','山',[0,0,1],'土'],['坤','地',[0,0,0],'土']];
@@ -1378,7 +1382,8 @@ function lunar(d,late){
 }
 function castTime(){
  const v=$('dt').value;if(!v)return err('請選擇時間。');err('');
- const L=lunar(v,$('late').checked);
+ let L;try{L=lunar(v,$('late').checked)}catch(e){return err('此裝置不支援農曆換算，請改用三數起卦。')}
+ if(!(L.y>0&&L.m>0&&L.day>0))return err('此裝置不支援農曆換算，請改用三數起卦。');
  const s1=L.yz+L.m+L.day,s2=s1+L.hz;
  const up=md(s1,8),lo=md(s2,8),mv=md(s2,6);
  finish({mode:'time',vals:valsFrom(up,lo,mv),src:`時間 ${v.replace('T',' ')}`,
@@ -1460,8 +1465,8 @@ $('autoS').addEventListener('click',()=>{while(S.lv.length<6)step(rndL())});
 $('rstS').addEventListener('click',sReset);
 $('copy').addEventListener('click',async()=>{if(!last)return;try{await navigator.clipboard.writeText(text(last));$('toast').textContent='已複製'}catch(e){$('toast').textContent='無法複製'}setTimeout(()=>$('toast').textContent='',2000)});
 sRender();showHist();castThree(true);
-}
-if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+})();
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
 </body>
 </html>
